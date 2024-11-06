@@ -19,11 +19,16 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.KeyboardOptions
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Visibility
+import androidx.compose.material.icons.filled.VisibilityOff
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.Icon
+import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Scaffold
@@ -77,6 +82,18 @@ fun RegisterScreen(onBackToLogin:()->Unit,authViewModel: AuthViewModel){
     var confirmPassword by remember { mutableStateOf("") }
     var email by remember { mutableStateOf("") }
     var errorMessage by remember { mutableStateOf<String?>(null) }
+
+    var usernameError by remember { mutableStateOf<String?>(null) }
+    var passwordError by remember { mutableStateOf<String?>(null) }
+    var confirmPasswordError by remember { mutableStateOf<String?>(null) }
+    var emailError by remember { mutableStateOf<String?>(null) }
+    var passwordVisible by remember { mutableStateOf(false) }
+    var confirmPasswordVisible by remember { mutableStateOf(false) }
+
+    val emailRegex = "^[\\w-\\.]+@[\\w-]+\\.[a-z]{2,3}\$".toRegex()
+    val passwordRegex = "^(?=.*[A-Z])(?=.*[a-z])(?=.*\\d)(?=.*[@#\$%^&+=!]).{8,}\$".toRegex()
+
+
     var context = LocalContext.current
 
     Box(modifier = Modifier.fillMaxSize()){
@@ -128,8 +145,10 @@ fun RegisterScreen(onBackToLogin:()->Unit,authViewModel: AuthViewModel){
                         , unfocusedBorderColor = Color.Gray, // Màu viền khi không được chọn
                         cursorColor = Color.Black //Màu của con trỏ
                     )
-
                 )
+                if (usernameError != null) {
+                    Text(text = usernameError!!, color = MaterialTheme.colorScheme.error)
+                }
                 Text(
                     text = "Mật khẩu",
                     fontSize = 18.sp,
@@ -142,8 +161,8 @@ fun RegisterScreen(onBackToLogin:()->Unit,authViewModel: AuthViewModel){
                 OutlinedTextField(
                     value = password,
                     onValueChange = {password = it},
-                    placeholder = { Text("Mật khẩu") },
-                    visualTransformation = PasswordVisualTransformation(),
+                    placeholder = { Text("VD: gồm chữ in hoa ,số,kí tự đặc biệt") },
+                    visualTransformation = if (passwordVisible) VisualTransformation.None else PasswordVisualTransformation(),
                     keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Text),
                     modifier = Modifier.fillMaxWidth()
                         .padding(top = 8.dp),
@@ -151,8 +170,20 @@ fun RegisterScreen(onBackToLogin:()->Unit,authViewModel: AuthViewModel){
                         focusedBorderColor = Color.Black // Màu viền khi được chọn
                         , unfocusedBorderColor = Color.Gray, // Màu viền khi không được chọn
                         cursorColor = Color.Black //Màu của con trỏ
-                    )
+                    ),
+                    trailingIcon = {
+                        val image = if (passwordVisible)
+                            Icons.Filled.Visibility
+                        else
+                            Icons.Filled.VisibilityOff
+                        IconButton(onClick = {passwordVisible = !passwordVisible}) {
+                            Icon(imageVector = image , contentDescription = if (passwordVisible) "Ẩn mật khẩu" else "Hiển thị mật khẩu")
+                        }
+                    }
                 )
+                if (passwordError != null) {
+                    Text(text = passwordError!!, color = MaterialTheme.colorScheme.error)
+                }
                 Text(
                     text = "Nhập lại mật khẩu",
                     fontSize = 18.sp,
@@ -166,7 +197,7 @@ fun RegisterScreen(onBackToLogin:()->Unit,authViewModel: AuthViewModel){
                     value = confirmPassword,
                     onValueChange = {confirmPassword = it},
                     placeholder = { Text("Nhập lại mật khẩu") },
-                    visualTransformation = PasswordVisualTransformation(),
+                    visualTransformation = if (confirmPasswordVisible) VisualTransformation.None else PasswordVisualTransformation(),
                     keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Text),
                     modifier = Modifier.fillMaxWidth()
                         .padding(top = 8.dp),
@@ -174,8 +205,20 @@ fun RegisterScreen(onBackToLogin:()->Unit,authViewModel: AuthViewModel){
                         focusedBorderColor = Color.Black // Màu viền khi được chọn
                         , unfocusedBorderColor = Color.Gray, // Màu viền khi không được chọn
                         cursorColor = Color.Black //Màu của con trỏ
-                    )
+                    ),
+                    trailingIcon = {
+                        val image = if (confirmPasswordVisible)
+                            Icons.Filled.Visibility
+                        else
+                            Icons.Filled.VisibilityOff
+                        IconButton(onClick = {confirmPasswordVisible = !confirmPasswordVisible}) {
+                            Icon(imageVector = image , contentDescription = if (confirmPasswordVisible) "Ẩn mật khẩu" else "Hiển thị mật khẩu")
+                        }
+                    }
                 )
+                if (confirmPasswordError != null) {
+                    Text(text = confirmPasswordError!!, color = MaterialTheme.colorScheme.error)
+                }
                 Text(
                     text = "Email",
                     fontSize = 18.sp,
@@ -198,6 +241,9 @@ fun RegisterScreen(onBackToLogin:()->Unit,authViewModel: AuthViewModel){
                         cursorColor = Color.Black //Màu của con trỏ
                     )
                 )
+                if (emailError != null) {
+                    Text(text = emailError!!, color = MaterialTheme.colorScheme.error)
+                }
                 Spacer(modifier = Modifier.height(16.dp))
                 //check lỗi
                 if(errorMessage != null){
@@ -210,7 +256,31 @@ fun RegisterScreen(onBackToLogin:()->Unit,authViewModel: AuthViewModel){
                     horizontalArrangement = Arrangement.SpaceBetween
                 ){
                     Button(onClick = {
-                        if(password == confirmPassword){
+                        usernameError = null
+                        passwordError = null
+                        confirmPasswordError = null
+                        emailError = null
+
+                        if (username.trim().isEmpty()){
+                            usernameError = "Tên tài khoản không được để trống"
+                        }
+                        if (password.trim().isEmpty()){
+                            passwordError = "Mật khẩu không được để trống"
+                        }else if (!passwordRegex.matches(password)){
+                            passwordError = "Mật khẩu không đủ mạnh"
+                        }
+                        if (confirmPassword.trim().isEmpty()){
+                            confirmPasswordError = "Xác nhận mật khẩu không được để trống"
+                        }else if (confirmPassword != password){
+                            confirmPasswordError = "Mật khẩu không khớp"
+                        }
+                        if (email.trim().isEmpty()){
+                            emailError = "Email không được để trống"
+                        }else if (!emailRegex.matches(email)){
+                            emailError = "Email không hợp lệ"
+                        }
+
+                        if(usernameError == null && emailError == null && passwordError == null && confirmPasswordError == null){
                             authViewModel.registerUser(username,username,email,password,
                                 onSuccess = {
                                     Toast.makeText(context, "Đăng ký thành công", Toast.LENGTH_SHORT).show()
@@ -220,8 +290,6 @@ fun RegisterScreen(onBackToLogin:()->Unit,authViewModel: AuthViewModel){
                                     Toast.makeText(context, "Lỗi: $error", Toast.LENGTH_SHORT).show()
                                 },context
                             )
-                        }else{
-                            Toast.makeText(context, "Kiểm tra lại mật khẩu", Toast.LENGTH_SHORT).show()
                         }
                     }, colors = ButtonDefaults.buttonColors(
                         containerColor = Color.Black, // Màu nền của button

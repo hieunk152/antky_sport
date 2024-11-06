@@ -98,6 +98,21 @@ class Login : ComponentActivity() {
         startActivity(intent)
     }
 }
+
+fun isEmailValid(email: String): Boolean {
+    if (email.trim().isEmpty()) return false // Trả về false nếu email trống
+    val emailRegex = "^[\\w-\\.]+@[\\w-]+\\.[a-z]{2,3}\$".toRegex()
+    return email.matches(emailRegex) // Kiểm tra định dạng email
+}
+
+// Hàm kiểm tra mật khẩu: kiểm tra trống và độ mạnh
+fun isPasswordValid(password: String): Boolean {
+    if (password.trim().isEmpty()) return false // Trả về false nếu mật khẩu trống
+    val passwordRegex = "^(?=.*[A-Z])(?=.*[a-z])(?=.*\\d)(?=.*[@#\$%^&+=!]).{8,}\$".toRegex()
+    return password.matches(passwordRegex) // Kiểm tra định dạng mật khẩu
+}
+
+
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun LoginScreen(onLoginClick:()-> Unit,onRegisterClick:()-> Unit,authViewModel:AuthViewModel){
@@ -256,15 +271,21 @@ fun LoginScreen(onLoginClick:()-> Unit,onRegisterClick:()-> Unit,authViewModel:A
                     ) {
                         Button(
                             onClick = {
-                                authViewModel.loginUser(email, password,
-                                    onSuccess = {
-                                        Toast.makeText(context, "Đăng nhập thành công", Toast.LENGTH_SHORT).show()
-                                        onLoginClick() // Chuyển sang màn hình Home sau khi đăng nhập thành công
-                                    },
-                                    onError = { error ->
-                                        Toast.makeText(context, "Lỗi: $error", Toast.LENGTH_SHORT).show()
-                                    },context
-                                )
+                                if (!isEmailValid(email)){
+                                    Toast.makeText(context, "Vui lòng nhập email hợp lệ", Toast.LENGTH_SHORT).show()
+                                }else if(!isPasswordValid(password)){
+                                    Toast.makeText(context, "Vui lòng nhập mật khẩu hợp lệ", Toast.LENGTH_SHORT).show()
+                                } else {
+                                    authViewModel.loginUser(email, password,
+                                        onSuccess = {
+                                            Toast.makeText(context, "Đăng nhập thành công", Toast.LENGTH_SHORT).show()
+                                            onLoginClick() // Chuyển sang màn hình Home sau khi đăng nhập thành công
+                                        },
+                                        onError = { error ->
+                                            Toast.makeText(context, "Lỗi: $error", Toast.LENGTH_SHORT).show()
+                                        },context
+                                    )
+                                }
                             }, // Xử lý sự kiện khi nhấn "Đăng nhập"
                             colors = ButtonDefaults.buttonColors(
                                 containerColor = Color.Black, // Màu nền của button

@@ -56,11 +56,17 @@ dependencies {
     androidTestImplementation(libs.androidx.ui.test.junit4)
     debugImplementation(libs.androidx.ui.tooling)
     debugImplementation(libs.androidx.ui.test.manifest)
-    
+
+    implementation ("androidx.navigation:navigation-compose:2.5.3")
+    implementation ("com.airbnb.android:lottie-compose:6.0.0")
+    implementation ("androidx.compose.material:material:1.5.0")
+
     implementation ("androidx.compose.material:material-icons-extended:1.3.1")
     implementation ("com.squareup.retrofit2:retrofit:2.9.0")
     implementation ("com.squareup.retrofit2:converter-gson:2.9.0")
     implementation ("io.coil-kt:coil-compose:1.4.0")
     implementation ("com.google.accompanist:accompanist-swiperefresh:0.30.1")
+    
+    implementation(kotlin("script-runtime"))
 
 }

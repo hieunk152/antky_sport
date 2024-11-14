@@ -1,6 +1,7 @@
 package com.example.comviet.Screen
 
 import android.os.Bundle
+import android.util.Log
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
@@ -18,6 +19,7 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.shape.CircleShape
+import androidx.compose.material.TabRowDefaults.Divider
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Icon
 import androidx.compose.material3.Scaffold
@@ -25,6 +27,7 @@ import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.livedata.observeAsState
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
@@ -38,9 +41,11 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavController
 import com.example.comviet.R
 import com.example.comviet.Screen.ui.theme.ComvietTheme
+import com.example.comviet.ViewModel.UserViewModel
 
 class ProfileScreen : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -57,19 +62,25 @@ class ProfileScreen : ComponentActivity() {
 }
 
 @Composable
-fun ProfileScreenUI(modifier: Modifier = Modifier, navController: NavController? = null) { // Thêm NavController
+fun ProfileScreenUI(modifier: Modifier = Modifier,
+                    navController: NavController? = null,
+                    userViewModel: UserViewModel = viewModel()
+) { // Thêm NavController
     var showDialog by remember { mutableStateOf(false) } // Biến trạng thái để kiểm soát dialog
+    val userName by userViewModel.userName.observeAsState("Tên Người Dùng")
+    val userEmail by userViewModel.userEmail.observeAsState("email@domain.com")
+
 
     Column(
         modifier = modifier
             .fillMaxSize()
-            .background(Color(0xFFE8ECF4)) // Màu nền cho phần dưới
+            .background(Color(0xFFFFFFFF)) // Màu nền cho phần dưới
     ) {
         // Header
         Box(
             modifier = Modifier
                 .fillMaxWidth()
-                .background(Color(0xFF3F51B5)) // Màu xanh của phần header
+                .background(Color(0xFFFFFFFF)) // Màu xanh của phần header
         ) {
             Icon(
                 painter = painterResource(id = R.drawable.back), // Thay bằng icon của bạn
@@ -101,22 +112,28 @@ fun ProfileScreenUI(modifier: Modifier = Modifier, navController: NavController?
 
                 // Name
                 Text(
-                    text = "Tấn Linh",
+                    text = userName,
                     fontWeight = FontWeight.Bold,
-                    color = Color.White,
+                    color = Color.Black,
                     fontSize = 24.sp,
                     modifier = Modifier.align(Alignment.CenterHorizontally)
                 )
 
                 // Email
                 Text(
-                    text = "admin@gmail.com",
-                    color = Color(0xFFD1CFCF),
+                    text = userEmail,
+                    color = Color.Black,
                     fontSize = 16.sp,
                     modifier = Modifier.align(Alignment.CenterHorizontally)
                 )
             }
         }
+
+        Divider(
+            color = Color.Gray, // Màu của đường phân cách
+            thickness = 0.40.dp, // Độ dày của đường phân cách
+            modifier = Modifier.fillMaxWidth()
+        )
 
         Spacer(modifier = Modifier.height(24.dp))
 
@@ -124,6 +141,10 @@ fun ProfileScreenUI(modifier: Modifier = Modifier, navController: NavController?
         ProfileMenuItem(iconId = R.drawable.btn_1, title = "Thông Báo", onClick = { /* Handle click */ })
         ProfileMenuItem(iconId = R.drawable.btn_2, title = "Sự Kiện", onClick = { /* Handle click */ })
         ProfileMenuItem(iconId = R.drawable.btn_5, title = "Chia Sẻ", onClick = { /* Handle click */ })
+        ProfileMenuItem(iconId = R.drawable.wallet , title = "Ví tiền", onClick =  {
+        navController?.navigate("wallet")
+            Log.e("zzzzz", "ProfileScreenUI: Da vao", null)
+        })
         ProfileMenuItem(iconId = R.drawable.btn_6, title = "Đăng Xuất", onClick = {
             showDialog = true // Khi nhấn Đăng Xuất, hiển thị dialog
         })

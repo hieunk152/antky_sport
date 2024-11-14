@@ -35,7 +35,7 @@ class AuthViewModel: ViewModel() {
             authToken = response.body()?.token
             if(authToken != null){
                 val sharedPreferences = context.getSharedPreferences("MyAppPrefs", MODE_PRIVATE)
-                val expirationTime = System.currentTimeMillis() + 300000 // 5 phuts
+                val expirationTime = System.currentTimeMillis() + 360000 // 5 phuts
                 with(sharedPreferences.edit()){
                     putString("userToken",authToken)
                     putLong("tokenExpiration",expirationTime)

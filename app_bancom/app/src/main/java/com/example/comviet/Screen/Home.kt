@@ -86,6 +86,7 @@ fun NavHostScreen(navController: NavHostController, productViewModel: ProductVie
                 productViewModel = productViewModel
             )
         }
+
         composable(
             "productDetail/{name}/{image_url}/{price}/{description}/{category}/{ratings}"
         ) { backStackEntry ->
@@ -94,9 +95,9 @@ fun NavHostScreen(navController: NavHostController, productViewModel: ProductVie
         composable("cart") {
             Cart(navController = navController) // Màn hình giỏ hàng
         }
-        composable("addProduct") {
-            AddProductScreen(navController = navController, productViewModel = productViewModel)
-        }
+//        composable("addProduct") {
+//            AddProductScreen(navController = navController, productViewModel = productViewModel)
+//        }
         composable("favourite") {
             FavouriteScreen()
         }
@@ -115,7 +116,8 @@ fun SearchBar(productViewModel: ProductViewModel) {
     Row(
         modifier = Modifier
             .fillMaxWidth()
-            .padding(vertical = 16.dp),
+            .padding(vertical = 10.dp)
+            .padding(top = 24.dp),
         horizontalArrangement = Arrangement.SpaceBetween,
         verticalAlignment = Alignment.CenterVertically
     ) {
@@ -126,10 +128,14 @@ fun SearchBar(productViewModel: ProductViewModel) {
             },
             modifier = Modifier
                 .weight(1f)
-                .height(60.dp),
+                .height(50.dp),
             placeholder = { Text("Tìm kiếm tên sản phẩm") },
             leadingIcon = {
-                Icon(painterResource(id = R.drawable.search), contentDescription = null)
+                Icon(
+                    painter = painterResource(id = R.drawable.search),
+                    contentDescription = null ,
+                    modifier = Modifier.size(20.dp)
+                )
             },
             trailingIcon = {
                 // Nếu đang tìm kiếm, hiển thị icon hủy
@@ -157,7 +163,11 @@ fun SearchBar(productViewModel: ProductViewModel) {
                     isSearching = true // Đặt trạng thái đang tìm kiếm
                 }
             },
-            modifier = Modifier.height(50.dp)
+            modifier = Modifier.height(50.dp),
+            colors = ButtonDefaults.buttonColors(
+                backgroundColor = Color.Black,
+                contentColor = Color.White
+            )
         ) {
             Text("Tìm kiếm")
         }
@@ -389,12 +399,12 @@ fun HomeScreen(navController: NavHostController, productViewModel: ProductViewMo
 
 @Composable
 fun BottomAppBarContent(navController: NavHostController, currentScreen: String) {
-    val xanhduong = Color(0xFF1F479A)
-    val nau = Color(0xFF8B4513) // Màu nâu cho mục được chọn
-    val xanhNhat = Color(0xFFADD8E6) // Màu xanh nước biển nhạt cho mục không được chọn
+    val background_btnBottom_navi = Color(0xFFFFFFFF)
+    val selected_btn_choose = Color(0xFF000000) // Màu đen cho mục được chọn
+    val selected_btn_not_choose = Color(0xFFBEBEBE) // Màu xám khói cho mục không được chọn
 
     BottomNavigation(
-        backgroundColor = xanhduong,
+        backgroundColor = background_btnBottom_navi,
         modifier = Modifier
             .height(100.dp)
             .navigationBarsPadding()
@@ -410,25 +420,26 @@ fun BottomAppBarContent(navController: NavHostController, currentScreen: String)
                     restoreState = true
                 }
             },
-            selectedContentColor = nau, // Màu nâu cho mục được chọn
-            unselectedContentColor = xanhNhat, // Màu xanh nhạt cho mục không được chọn
+            selectedContentColor = selected_btn_choose, // Màu nâu cho mục được chọn
+            unselectedContentColor = selected_btn_not_choose, // Màu xanh nhạt cho mục không được chọn
             modifier = Modifier
                 .height(if (currentScreen == "home") 120.dp else 100.dp) // Phóng to khi được chọn
         )
 
-        // Nút để chuyển sang màn hình thêm sản phẩm
-        BottomNavigationItem(
-            icon = { Icon(Icons.Filled.Add, contentDescription = "Thêm sản phẩm") },
-            label = { Text("Thêm SP", textAlign = TextAlign.Center) },
-            selected = currentScreen == "addProduct", // Kiểm tra nếu màn hình hiện tại là "addProduct"
-            onClick = {
-                navController.navigate("addProduct") // Chuyển sang màn hình thêm sản phẩm
-            },
-            selectedContentColor = nau,
-            unselectedContentColor = xanhNhat,
-            modifier = Modifier
-                .height(if (currentScreen == "addProduct") 120.dp else 100.dp)
-        )
+//        // Nút để chuyển sang màn hình thêm sản phẩm
+//        BottomNavigationItem(
+//            icon = { Icon(Icons.Filled.Add, contentDescription = "") },
+//            label = { Text("Thêm SP", textAlign = TextAlign.Center) },
+//            selected = currentScreen == "addProduct", // Kiểm tra nếu màn hình hiện tại là "addProduct"
+//            onClick = {
+//                navController.navigate("addProduct") // Chuyển sang màn hình thêm sản phẩm
+//            },
+//            selectedContentColor = selected_btn_choose,
+//            unselectedContentColor = selected_btn_not_choose,
+//            modifier = Modifier
+//                .height(if (currentScreen == "addProduct") 120.dp else 100.dp)
+//        )
+
 
         BottomNavigationItem(
             icon = { Icon(Icons.Filled.Favorite, contentDescription = "Yêu Thích") },
@@ -437,8 +448,8 @@ fun BottomAppBarContent(navController: NavHostController, currentScreen: String)
             onClick = {
                 navController.navigate("favourite")
             },
-            selectedContentColor = nau,
-            unselectedContentColor = xanhNhat,
+            selectedContentColor = selected_btn_choose,
+            unselectedContentColor = selected_btn_not_choose,
             modifier = Modifier
                 .height(if (currentScreen == "favourite") 120.dp else 100.dp)
         )
@@ -453,8 +464,8 @@ fun BottomAppBarContent(navController: NavHostController, currentScreen: String)
                     restoreState = true
                 }
             },
-            selectedContentColor = nau,
-            unselectedContentColor = xanhNhat,
+            selectedContentColor = selected_btn_choose,
+            unselectedContentColor = selected_btn_not_choose,
             modifier = Modifier
                 .height(if (currentScreen == "cart") 120.dp else 100.dp)
         )
@@ -466,8 +477,8 @@ fun BottomAppBarContent(navController: NavHostController, currentScreen: String)
             onClick = {
                 navController.navigate("account")
             },
-            selectedContentColor = nau,
-            unselectedContentColor = xanhNhat,
+            selectedContentColor = selected_btn_choose,
+            unselectedContentColor = selected_btn_not_choose,
             modifier = Modifier
                 .height(if (currentScreen == "account") 120.dp else 100.dp)
         )

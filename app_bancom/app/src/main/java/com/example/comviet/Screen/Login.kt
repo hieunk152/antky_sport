@@ -50,8 +50,10 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.lifecycle.viewmodel.compose.viewModel
 import com.example.comviet.Screen.ui.theme.ComvietTheme
 import com.example.comviet.ViewModel.AuthViewModel
+import com.example.comviet.ViewModel.UserViewModel
 
 class Login : ComponentActivity() {
     private val authViewModel = AuthViewModel()//Khởi tạo ViewModel
@@ -115,7 +117,8 @@ fun isPasswordValid(password: String): Boolean {
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun LoginScreen(onLoginClick:()-> Unit,onRegisterClick:()-> Unit,authViewModel:AuthViewModel){
+fun LoginScreen(onLoginClick:()-> Unit,onRegisterClick:()-> Unit,authViewModel:AuthViewModel
+,userViewModel: UserViewModel = viewModel() ){
     val context = LocalContext.current
     var email by rememberSaveable { mutableStateOf("") } // Lưu trữ và khôi phục trạng thái cho email
     var password by rememberSaveable { mutableStateOf("") } // Lưu trữ và khôi phục trạng thái cho mật khẩu

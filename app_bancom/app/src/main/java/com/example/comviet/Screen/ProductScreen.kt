@@ -47,22 +47,22 @@ import com.example.comviet.R
 import com.example.comviet.Screen.ui.theme.ComvietTheme
 import com.example.comviet.ViewModel.UserViewModel
 
-class ProfileScreen : ComponentActivity() {
+class ProductScreen : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         enableEdgeToEdge()
         setContent {
-            ComvietTheme  {
-                Scaffold(modifier = Modifier.fillMaxSize()) { innerPadding ->
-                    ProfileScreenUI(modifier = Modifier.padding(innerPadding))
-                }
+//            ComvietTheme  {
+//                Scaffold(modifier = Modifier.fillMaxSize()) { innerPadding ->
+                    ProfileScreenUI()
+//                }
             }
         }
     }
-}
+
 
 @Composable
-fun ProfileScreenUI(modifier: Modifier = Modifier,
+fun ProfileScreenUI(
                     navController: NavController? = null,
                     userViewModel: UserViewModel = viewModel()
 ) { // Thêm NavController
@@ -72,7 +72,7 @@ fun ProfileScreenUI(modifier: Modifier = Modifier,
 
 
     Column(
-        modifier = modifier
+        modifier = Modifier
             .fillMaxSize()
             .background(Color(0xFFFFFFFF)) // Màu nền cho phần dưới
     ) {

@@ -4,41 +4,44 @@ import android.os.Bundle
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
-import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.foundation.layout.padding
-import androidx.compose.material3.Scaffold
-import androidx.compose.foundation.background
-import androidx.compose.foundation.clickable
-import androidx.compose.foundation.layout.*
-import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.material.*
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.AccountBalanceWallet
-import androidx.compose.material.icons.filled.Menu
-import androidx.compose.material.icons.filled.Savings
-import androidx.compose.material.icons.filled.ShowChart
-import androidx.compose.runtime.Composable
-import androidx.compose.ui.Alignment
-import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.graphics.vector.ImageVector
-import androidx.compose.ui.res.painterResource
-import androidx.compose.ui.text.font.FontWeight
-import androidx.compose.ui.unit.dp
-import androidx.compose.ui.unit.sp
-import androidx.compose.foundation.Image
-import androidx.compose.foundation.shape.CircleShape
-import androidx.compose.material.icons.filled.MoreVert
-import androidx.compose.ui.platform.LocalContext
-import androidx.compose.ui.tooling.preview.Preview
-import androidx.navigation.NavController
-import androidx.navigation.NavHost
-import androidx.navigation.NavHostController
+import com.example.comviet.Screen.ui.theme.ComvietTheme
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
 import com.example.comviet.R
-import com.example.comviet.Screen.ui.theme.ComvietTheme
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
+import androidx.compose.ui.tooling.preview.Preview
+import androidx.navigation.NavController
+import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
+import androidx.compose.foundation.Image
+import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.background
+import androidx.compose.foundation.clickable
+import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.shape.CircleShape
+import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.material3.Text
+import androidx.compose.runtime.Composable
+import androidx.compose.ui.Alignment
+import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.text.font.FontWeight
+
+import androidx.compose.material.Card
+import androidx.compose.material3.ButtonDefaults
+import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.Icon
+import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.TextField
+import androidx.compose.material3.TextFieldDefaults
+import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.window.Dialog
+
 
 class WalletScreen : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -49,7 +52,6 @@ class WalletScreen : ComponentActivity() {
                 val navController = rememberNavController()
                 NavHost(navController = navController, startDestination = "wallet") {
                     composable("wallet"){ WalletCompose(navController) }
-                    composable("add_money_screen"){ AddMoneyScreen() }
                 }
 
             }
@@ -90,7 +92,10 @@ fun TopBar() {
 }
 
 @Composable
+@OptIn(ExperimentalMaterial3Api::class)
 fun BalanceCard(navController: NavController) {
+    var showAddMoneyDialog by remember { mutableStateOf(false) }
+    var showWithdrawDialog by remember { mutableStateOf(false) }
     Card(
         shape = RoundedCornerShape(16.dp),
         backgroundColor = Color.White,
@@ -103,7 +108,7 @@ fun BalanceCard(navController: NavController) {
                 .fillMaxWidth(),
             horizontalAlignment = Alignment.CenterHorizontally
         ) {
-            Text(
+            androidx.compose.material3.Text(
                 text = "Available Balance",
                 fontSize = 16.sp,
                 color = Color.Gray
@@ -113,11 +118,93 @@ fun BalanceCard(navController: NavController) {
                 modifier = Modifier.fillMaxWidth(),
                 horizontalArrangement = Arrangement.SpaceAround
             ) {
-                ActionButton(iconRes = R.drawable.btn_1, label = "Add Money") {
-                    navController.navigate("add_money_screen")
+                ActionButton(iconRes = R.drawable.plus, label = "Add Money") {
+                    showAddMoneyDialog = true
                 }
-                ActionButton(iconRes = R.drawable.btn_2, label = "Withdraw") {
+                ActionButton(iconRes = R.drawable.money_withdrawal, label = "Withdraw") {
+                    showWithdrawDialog = true
+                }
+            }
+        }
+    }
 
+    if (showAddMoneyDialog){
+        Dialog(onDismissRequest = {showAddMoneyDialog = false}) {
+            androidx.compose.material3.Surface(
+                shape = RoundedCornerShape(16.dp),
+                modifier = Modifier.padding(16.dp),
+                color = MaterialTheme.colorScheme.surface
+            ) {
+                Column(
+                    modifier = Modifier.padding(16.dp),
+                    horizontalAlignment = Alignment.CenterHorizontally
+                ) {
+                    Text(
+                        text = "Add Money",
+                        style = MaterialTheme.typography.titleLarge,
+                        color = MaterialTheme.colorScheme.onSurface
+                    )
+                    Spacer(modifier = Modifier.height(16.dp))
+                    TextField(
+                        value = "",
+                        onValueChange = {},
+                        label = { Text("Enter Amount" , color = MaterialTheme.colorScheme.onSurfaceVariant)},
+                        colors = TextFieldDefaults.textFieldColors(
+                            containerColor = MaterialTheme.colorScheme.surface,
+                            focusedTextColor = MaterialTheme.colorScheme.onSurface,
+                            cursorColor = MaterialTheme.colorScheme.primary
+                        )
+                    )
+                    Spacer(modifier = Modifier.height(16.dp))
+                    androidx.compose.material3.Button(
+                        onClick = {
+                            showAddMoneyDialog = false
+                        },
+                        colors = ButtonDefaults.buttonColors(containerColor = MaterialTheme.colorScheme.primary)
+                    ) {
+                        Text("Confirm", color = MaterialTheme.colorScheme.onPrimary)
+                    }
+                }
+            }
+        }
+    }
+
+    if (showWithdrawDialog){
+        Dialog(onDismissRequest = {showAddMoneyDialog = false}) {
+            androidx.compose.material3.Surface(
+                shape = RoundedCornerShape(16.dp),
+                modifier = Modifier.padding(16.dp),
+                color = MaterialTheme.colorScheme.surface
+            ) {
+                Column(
+                    modifier = Modifier.padding(16.dp),
+                    horizontalAlignment = Alignment.CenterHorizontally
+                ) {
+                    Text(
+                        text = "Add WithDraw",
+                        style = MaterialTheme.typography.titleLarge,
+                        color = MaterialTheme.colorScheme.onSurface
+                    )
+                    Spacer(modifier = Modifier.height(16.dp))
+                    TextField(
+                        value = "",
+                        onValueChange = {},
+                        label = { Text("Enter Amount" , color = MaterialTheme.colorScheme.onSurfaceVariant)},
+                        colors = TextFieldDefaults.textFieldColors(
+                            containerColor = MaterialTheme.colorScheme.surface,
+                            focusedTextColor = MaterialTheme.colorScheme.onSurface,
+                            cursorColor = MaterialTheme.colorScheme.primary
+                        )
+                    )
+                    Spacer(modifier = Modifier.height(16.dp))
+                    androidx.compose.material3.Button(
+                        onClick = {
+                            showWithdrawDialog = false
+                        },
+                        colors = ButtonDefaults.buttonColors(containerColor = MaterialTheme.colorScheme.primary)
+                    ) {
+                        Text("Confirm", color = MaterialTheme.colorScheme.onPrimary)
+                    }
                 }
             }
         }
@@ -207,22 +294,7 @@ fun TransactionItem(
     }
 }
 
-@Composable
-fun AddMoneyScreen() {
-    Box(
-        modifier = Modifier
-            .fillMaxSize()
-            .background(Color.White),
-        contentAlignment = Alignment.Center
-    ) {
-        Text(
-            text = "Add Money Screen",
-            fontSize = 24.sp,
-            fontWeight = FontWeight.Bold,
-            color = Color.Black
-        )
-    }
-}
+
 @Preview(showBackground = true)
 @Composable
 fun PreviewWalletScreen(){

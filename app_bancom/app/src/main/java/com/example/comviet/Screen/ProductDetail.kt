@@ -62,21 +62,41 @@ class ProductDetail : ComponentActivity() {
 }
 
 data class ProductItem(
-    val name: String,
-    val price: Double,
-    val imageUrl: String,
-    val description: String,
-    val category: String
+    var title: String,            // Tên sản phẩm
+    var code: String,       // Mã sản phẩm của sản phẩm
+    var quantity: Number,          // số lượng của sản phẩm
+    var price: Double,             //Giá của sản phẩm
+    var size: Array<String>,     // Kích thước sản phẩm
+    var color: Array<String>,   //màu của sản phẩm
+    var image: String,          // Ảnh của sản phẩm
+    var category: String,        // Danh mục của sản phẩm
+    var description: String,    // Mô tả sản phẩm
+    val createdAt: String,       // Thời gian sản phẩm được tạo
+    val updatedAt: String
+)
+
+data class CartItem(
+    val code: String,
+    val quantity: Number
 )
 
 @Composable
 fun ProductDetailScreen(navController: NavHostController, backStackEntry: NavBackStackEntry, modifier: Modifier = Modifier) {
-    val productName = backStackEntry.arguments?.getString("name") ?: ""
-    val productImageUrl = backStackEntry.arguments?.getString("image_url") ?: ""
+    val productTitle = backStackEntry.arguments?.getString("title") ?: ""
+    val productCode = backStackEntry.arguments?.getString("code") ?: ""
+    val productQuantity = backStackEntry.arguments?.getString("quantity")?.toInt() ?: 0
     val productPrice = backStackEntry.arguments?.getString("price")?.toDouble() ?: 0.0
-    val productDescription = backStackEntry.arguments?.getString("description") ?: ""
+
+    val sizeString = backStackEntry.arguments?.getString("size") ?: ""
+    val colorString = backStackEntry.arguments?.getString("color") ?: ""
+    val productSize = if (sizeString.isNotEmpty()) sizeString.split(",") else emptyList()
+    val productColor = if (colorString.isNotEmpty()) colorString.split(",") else emptyList()
+
+    val productImage = backStackEntry.arguments?.getString("image") ?: ""
     val productCategory = backStackEntry.arguments?.getString("category") ?: ""
-    val productRatings = backStackEntry.arguments?.getString("ratings")?.toFloat() ?: 0f
+    val productDescription = backStackEntry.arguments?.getString("description") ?: ""
+    val productCreatedAt = backStackEntry.arguments?.getString("createdAt") ?: ""
+    val productUpdatedAt = backStackEntry.arguments?.getString("updatedAt") ?: ""
 
     val context = LocalContext.current
 
@@ -92,7 +112,7 @@ fun ProductDetailScreen(navController: NavHostController, backStackEntry: NavBac
             Spacer(modifier = Modifier.height(16.dp))
 
             Image(
-                painter = rememberImagePainter(productImageUrl),
+                painter = rememberImagePainter(productImage),
                 contentDescription = null,
                 contentScale = ContentScale.Crop,
                 modifier = Modifier
@@ -104,7 +124,7 @@ fun ProductDetailScreen(navController: NavHostController, backStackEntry: NavBac
             Spacer(modifier = Modifier.height(16.dp))
 
             Text(
-                text = productName,
+                text = productTitle,
                 style = MaterialTheme.typography.titleLarge.copy(fontWeight = FontWeight.Bold),
                 fontSize = 32.sp, // Điều chỉnh kích thước chữ
                 color = Color(0xFF333333) // Màu chữ tối
@@ -113,7 +133,7 @@ fun ProductDetailScreen(navController: NavHostController, backStackEntry: NavBac
             Spacer(modifier = Modifier.height(12.dp))
 
             Text(
-                text = "Đánh giá: ${productRatings.toString()}",
+                text = "Mã sản phẩm: $productCode",
                 style = MaterialTheme.typography.headlineSmall,
                 color = Color(0xFF666666) // Màu chữ trung tính cho thông tin phụ
             )
@@ -151,11 +171,17 @@ fun ProductDetailScreen(navController: NavHostController, backStackEntry: NavBac
                     val editor = sharedPreferences.edit()
 
                     val newProduct = ProductItem(
-                        name = productName,
+                        title = productTitle,
+                        code = productCode,
+                        quantity = productQuantity,
                         price = productPrice,
-                        imageUrl = productImageUrl,
+                        size = productSize.toTypedArray(),
+                        color = productColor.toTypedArray(),
+                        image = productImage,
+                        category = productCategory,
                         description = productDescription,
-                        category = productCategory
+                        createdAt = productCreatedAt,
+                        updatedAt = productUpdatedAt
                     )
 
                     val existingProducts = sharedPreferences.getString("cartItems", "[]")
@@ -190,11 +216,17 @@ fun ProductDetailScreen(navController: NavHostController, backStackEntry: NavBac
 
                     // Tạo đối tượng sản phẩm mới
                     val favouriteProduct = ProductItem(
-                        name = productName,
+                        title = productTitle,
+                        code = productCode,
+                        quantity = productQuantity,
                         price = productPrice,
-                        imageUrl = productImageUrl,
+                        size = productSize.toTypedArray(),
+                        color = productColor.toTypedArray(),
+                        image = productImage,
+                        category = productCategory,
                         description = productDescription,
-                        category = productCategory
+                        createdAt = productCreatedAt,
+                        updatedAt = productUpdatedAt
                     )
 
                     // Lấy danh sách sản phẩm yêu thích hiện tại từ SharedPreferences

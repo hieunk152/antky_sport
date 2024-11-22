@@ -42,6 +42,7 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.navigation.NavHostController
 import androidx.navigation.compose.rememberNavController
+import com.example.comviet.Model.Cart
 import com.example.comviet.Model.Product
 import com.example.comviet.R
 import com.example.comviet.Screen.ui.theme.ComvietTheme
@@ -66,16 +67,18 @@ fun Cart(navController: NavHostController) {
     val sharedPreferences: SharedPreferences = context.getSharedPreferences("cart_prefs", Context.MODE_PRIVATE)
 
     // Lấy danh sách sản phẩm từ SharedPreferences
-    var productList by remember {
+    var cartList by remember {
         mutableStateOf(
-            Gson().fromJson(sharedPreferences.getString("cartItems", "[]"), Array<Product>::class.java).toList()
+            listOf(
+                Gson().fromJson(sharedPreferences.getString("cartItems", "[]"), Array<Cart>::class.java).toList()
+            )
         )
     }
 
     var showDeleteDialog by remember { mutableStateOf(false) }
-    var showPaymentSuccess by remember { mutableStateOf(false) } // Trạng thái hiển thị thông báo thành công
-    var productToDelete by remember { mutableStateOf<Product?>(null) }
-    var showPaymentDialog by remember { mutableStateOf(false) } // Trạng thái mở hộp thoại thanh toán
+    var showPaymentSuccess by remember { mutableStateOf(false) }
+    var cartToDelete by remember { mutableStateOf<Cart?>(null) }
+    var showPaymentDialog by remember { mutableStateOf(false) }
 
     Column(
         modifier = Modifier
@@ -84,32 +87,29 @@ fun Cart(navController: NavHostController) {
     ) {
         Text(
             text = "Giỏ Hàng",
-            style = MaterialTheme.typography.headlineLarge,  // Thay đổi kích thước chữ
-            color = Color.Black,  // Màu sắc của tiêu đề
+            style = MaterialTheme.typography.headlineLarge,
+            color = Color.Black,
             modifier = Modifier
-                .fillMaxWidth()  // Tiêu đề chiếm hết chiều rộng của màn hình
-                .padding(vertical = 16.dp),  // Thêm khoảng cách phía trên và dưới
-            textAlign = TextAlign.Center  // Căn giữa tiêu đề
+                .fillMaxWidth()
+                .padding(vertical = 16.dp),
+            textAlign = TextAlign.Center
         )
 
-        // Nếu giỏ hàng trống, hiển thị thông báo và nút về trang chủ
-        if (productList.isEmpty()) {
+        if (cartList.isEmpty()) {
             Column(
-                modifier = Modifier
-                    .fillMaxSize(),  // Cột chiếm toàn bộ màn hình
-                verticalArrangement = Arrangement.Center,  // Căn giữa theo chiều dọc
+                modifier = Modifier.fillMaxSize(),
+                verticalArrangement = Arrangement.Center,
                 horizontalAlignment = Alignment.CenterHorizontally
             ) {
                 Text(
                     text = "Giỏ hàng rỗng",
                     style = MaterialTheme.typography.headlineMedium,
                     textAlign = TextAlign.Center
-
                 )
                 Spacer(modifier = Modifier.height(16.dp))
 
                 Button(
-                    onClick = { navController.navigate("home") }, // Điều hướng về màn hình Home
+                    onClick = { navController.navigate("home") },
                     modifier = Modifier
                         .fillMaxWidth()
                         .height(50.dp),
@@ -118,41 +118,33 @@ fun Cart(navController: NavHostController) {
                     Text(text = "Về trang chủ", color = Color.White)
                 }
             }
-
         } else {
-            // Thay thế LazyColumn bằng Column kết hợp với verticalScroll
-            val scrollState = rememberScrollState() // Tạo ScrollState để cuộn nội dung
+            val scrollState = rememberScrollState()
 
             Column(
                 modifier = Modifier
                     .fillMaxWidth()
-                    .verticalScroll(scrollState), // Thêm khả năng cuộn
+                    .verticalScroll(scrollState),
                 verticalArrangement = Arrangement.spacedBy(8.dp)
             ) {
-                productList.forEach { product ->
-                    CartItem(
-                        name = product.name,
-                        price = product.price,
-                        imageUrl = null,
-                        onDeleteClick = {
-                            // Hiển thị hộp thoại xóa
-                            productToDelete = product
-                            showDeleteDialog = true
-                        }
-                    )
-                }
+//                cartList.forEach { cart ->
+//                    CartItem(
+//                        code = cart.code,
+//                        quantity = cart.quantity,
+//                        onDeleteClick = {
+//                            cartToDelete = cart
+//                            showDeleteDialog = true
+//                        }
+//                    )
+//                }
             }
 
             Spacer(modifier = Modifier.height(16.dp))
 
-            // Tổng cộng
-            CartSummary(subtotal = productList.sumByDouble { it.price }, delivery = 10.0, tax = 2.2)
-
             Spacer(modifier = Modifier.height(16.dp))
 
-            // Nút "Check Out"
             Button(
-                onClick = { showPaymentDialog = true }, // Mở hộp thoại thanh toán khi nhấn nút "Thanh Toán"
+                onClick = { showPaymentDialog = true },
                 modifier = Modifier
                     .fillMaxWidth()
                     .height(50.dp),
@@ -161,21 +153,17 @@ fun Cart(navController: NavHostController) {
                 Text(text = "Thanh Toán", color = Color.White)
             }
 
-            // Hiển thị hộp thoại thanh toán
             if (showPaymentDialog) {
                 PaymentDialog(
-                    onDismiss = { showPaymentDialog = false },  // Đóng hộp thoại thanh toán
+                    onDismiss = { showPaymentDialog = false },
                     onPaymentOptionSelected = { option ->
                         if (option == "Thanh toán tại nhà") {
-                            // Xóa toàn bộ sản phẩm trong giỏ hàng
-                            productList = emptyList()
+                            cartList = emptyList()
 
-                            // Cập nhật SharedPreferences sau khi thanh toán
                             val editor = sharedPreferences.edit()
-                            editor.putString("cartItems", Gson().toJson(productList))
+                            editor.putString("cartItems", Gson().toJson(cartList))
                             editor.apply()
 
-                            // Hiển thị thông báo thanh toán thành công
                             showPaymentSuccess = true
                         }
                         showPaymentDialog = false
@@ -183,7 +171,6 @@ fun Cart(navController: NavHostController) {
                 )
             }
 
-            // Hiển thị thông báo thanh toán thành công
             if (showPaymentSuccess) {
                 AlertDialog(
                     onDismissRequest = { showPaymentSuccess = false },
@@ -197,24 +184,21 @@ fun Cart(navController: NavHostController) {
                 )
             }
 
-            // Hiển thị hộp thoại xác nhận xóa nếu có sản phẩm cần xóa
-            if (showDeleteDialog && productToDelete != null) {
+            if (showDeleteDialog && cartToDelete != null) {
                 ConfirmDeleteDialog(
                     onConfirm = {
-                        // Xóa sản phẩm khỏi danh sách và SharedPreferences
-                        productList = productList.filter { it != productToDelete }
+//                        cartList = cartList.filter { it != cartToDelete }
 
-                        // Cập nhật SharedPreferences sau khi xóa
                         val editor = sharedPreferences.edit()
-                        editor.putString("cartItems", Gson().toJson(productList))
+                        editor.putString("cartItems", Gson().toJson(cartList))
                         editor.apply()
 
                         showDeleteDialog = false
-                        productToDelete = null
+                        cartToDelete = null
                     },
                     onDismiss = {
                         showDeleteDialog = false
-                        productToDelete = null
+                        cartToDelete = null
                     }
                 )
             }
@@ -222,39 +206,33 @@ fun Cart(navController: NavHostController) {
     }
 }
 
-
-
 @Composable
-fun CartItem(name: String, price: Double, imageUrl: String?, onDeleteClick: () -> Unit) {
+fun CartItem(code: String, quantity: Number, onDeleteClick: () -> Unit) {
     Card(
         modifier = Modifier
             .fillMaxWidth()
             .padding(8.dp),
-        elevation = CardDefaults.cardElevation(4.dp), // Thiết lập độ đổ bóng cho Card
-        shape = MaterialTheme.shapes.medium // Bo góc cho Card
+        elevation = CardDefaults.cardElevation(4.dp),
+        shape = MaterialTheme.shapes.medium
     ) {
         Row(
             modifier = Modifier
                 .fillMaxWidth()
-                .padding(16.dp), // Khoảng cách bên trong Card
+                .padding(16.dp),
             verticalAlignment = Alignment.CenterVertically
         ) {
-            Spacer(modifier = Modifier.width(16.dp))
-
-            // Thông tin sản phẩm
             Column(modifier = Modifier.weight(1f)) {
                 Text(
-                    text = name,
+                    text = "Mã: $code",
                     style = MaterialTheme.typography.bodyLarge
                 )
                 Text(
-                    text = "$$price",
+                    text = "Số lượng: $quantity",
                     style = MaterialTheme.typography.bodyLarge,
                     color = Color(0xFF6200EE)
                 )
             }
 
-            // Nút Xóa
             IconButton(onClick = { onDeleteClick() }) {
                 Icon(
                     painter = painterResource(id = R.drawable.ic_delete),
@@ -375,6 +353,6 @@ fun PaymentDialog(onDismiss: () -> Unit, onPaymentOptionSelected: (String) -> Un
 @Preview(showBackground = true)
 @Composable
 fun PreviewCartScreen() {
-    val navController = rememberNavController() // Khởi tạo NavHostController
+    val navController = rememberNavController()
     Cart(navController = navController)
 }

@@ -54,7 +54,7 @@ class ProductViewModel : ViewModel() {
                 if (response.isSuccessful) {
                     val products = response.body()
                     searchResults = products ?: emptyList() // Cập nhật kết quả tìm kiếm
-                    Log.d("ProductViewModel", "Search results: ${searchResults.joinToString { it.name }}")
+                    Log.d("ProductViewModel", "Search results: ${searchResults.joinToString { it.title }}")
                 } else {
                     Log.e("ProductViewModel", "API Error: ${response.message()}")
                 }
@@ -73,23 +73,32 @@ class ProductViewModel : ViewModel() {
     }
 
     fun addProduct(
-        name: String,
-        imageUrl: String,
+        title: String,
+        code: String,
+        quantity: Number,
         price: Double,
-        description: String,
+        size: Array<String>,
+        color: Array<String>,
+        image: String,
         category: String,
+        description: String,
+        createdAt: String,
+        updatedAt: String,
         onResult: () -> Unit
     ) {
         viewModelScope.launch {
             try {
                 val response = RetrofitInstance.api.addProduct(
                     Product(
-                        name = name,
-                        image_url = imageUrl,
+                        title = title,
+                        code = code,
+                        quantity = quantity,
                         price = price,
-                        description = description,
+                        size = size,
+                        color = color,
+                        image = image,
                         category = category,
-                        ratings = 0f ,
+                        description = description,
                         createdAt = "2024-10-16", // Giá trị của ngày tạo
                         updatedAt = "2024-10-16"
                     )

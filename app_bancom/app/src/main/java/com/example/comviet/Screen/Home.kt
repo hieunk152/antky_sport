@@ -88,21 +88,22 @@ fun NavHostScreen(navController: NavHostController, productViewModel: ProductVie
         }
 
         composable(
-            "productDetail/{name}/{image_url}/{price}/{description}/{category}/{ratings}"
+            "productDetail/{title}/{code}/{quantity}/{price}/{size}/{color}/{image}/{category}/{description}/{createdAt}/{updatedAt}",
         ) { backStackEntry ->
             ProductDetailScreen(navController = navController, backStackEntry = backStackEntry)
         }
         composable("cart") {
             Cart(navController = navController) // Màn hình giỏ hàng
         }
-//        composable("addProduct") {
-//            AddProductScreen(navController = navController, productViewModel = productViewModel)
-//        }
-        composable("favourite") {
-            FavouriteScreen()
+        composable("history") {
+            History(navController)
         }
         composable("account"){
-            ProfileScreenUI()
+            ProfileScreenUI(navController)
+        }
+
+        composable("wallet"){
+            WalletCompose(navController)
         }
 
     }
@@ -241,12 +242,17 @@ fun CategoryList(categories: List<Pair<Int, String>>, modifier: Modifier = Modif
 
 @Composable
 fun ProductItem(
-    imageUrl: String,     // URL của hình ảnh
-    rating: Float,        // Đánh giá sản phẩm
-    title: String,        // Tên sản phẩm
-    price: Double,        // Giá sản phẩm
-    description: String,  // Mô tả sản phẩm
-    category: String,     // Danh mục sản phẩm
+    title: String,
+    code: String,
+    quantity: Number,
+    price: Double,
+    size: Array<String>,
+    color: Array<String>,
+    image: String,
+    category: String,
+    description: String,
+    createdAt: String,
+    updatedAt: String,
     modifier: Modifier = Modifier,
     onclick: () -> Unit
 ) {
@@ -264,7 +270,7 @@ fun ProductItem(
                 .background(MaterialTheme.colors.surface)
         ) {
             Image(
-                painter = rememberImagePainter(data = imageUrl), // Sử dụng Coil để tải hình ảnh từ URL
+                painter = rememberImagePainter(data = image), // Sử dụng Coil để tải hình ảnh từ URL
                 contentDescription = null,
                 contentScale = ContentScale.Crop,
                 modifier = Modifier
@@ -284,7 +290,7 @@ fun ProductItem(
             Spacer(modifier = Modifier.height(8.dp))
             Row(
                 verticalAlignment = Alignment.CenterVertically,
-                horizontalArrangement = Arrangement.SpaceBetween,
+                horizontalArrangement = Arrangement.Absolute.SpaceBetween,
                 modifier = Modifier.fillMaxWidth()
             ) {
                 Text(
@@ -292,7 +298,7 @@ fun ProductItem(
                     style = MaterialTheme.typography.button.copy(color = Color.Red)
                 )
                 Text(
-                    text = "Cmt: $rating",
+                    text = "Code: $code",
                     style = MaterialTheme.typography.button,
                     color = Color.Gray
                 )
@@ -303,13 +309,41 @@ fun ProductItem(
 
 @Composable
 fun ProductListScreen(navController: NavHostController, productViewModel: ProductViewModel) {
-    val products = if (productViewModel.searchResults.isNotEmpty()) {
-        Log.d("ProductListScreen", "Displaying search results: ${productViewModel.searchResults.joinToString { it.name }}")
-        productViewModel.searchResults
-    } else {
-        Log.d("ProductListScreen", "Displaying full product list: ${productViewModel.productList.joinToString { it.name }}")
-        productViewModel.productList
-    }
+//    val products = if (productViewModel.searchResults.isNotEmpty()) {
+//        Log.d("ProductListScreen", "Displaying search results: ${productViewModel.searchResults.joinToString { it.title }}")
+//        productViewModel.searchResults
+//    } else {
+//        Log.d("ProductListScreen", "Displaying full product list: ${productViewModel.productList.joinToString { it.title }}")
+//        productViewModel.productList
+//    }
+    val products = listOf(
+        ProductItem(
+            title = "Sản phẩm 1",
+            code = "SP001",
+            quantity = 10,
+            price = 100.0,
+            size = arrayOf("S", "M", "L"),
+            color = arrayOf("Đỏ", "Xanh", "Vàng"),
+            image = "https://encrypted-tbn3.gstatic.com/shopping?q=tbn:ANd9GcT5CdY9VHE33vBsrR95psqSIKh6mXAIj2e2hwnuWOBFqQexIoFOpCei3SKlYnBxpd7_rucqcQ3IyjlxkVIC5DDJDkAdYIDt0wsTd_qhaT-ME6Vy1kdp0bUcog&usqp=CAc",
+            category = "Áo thun",
+            description = "Mô tả sản phẩm 1",
+            createdAt = "2024-11-21",
+            updatedAt = "2024-11-21"
+        ),
+        ProductItem(
+            title = "Sản phẩm 2",
+            code = "SP002",
+            quantity = 5,
+            price = 150.0,
+            size = arrayOf("M", "L"),
+            color = arrayOf("Đen", "Trắng"),
+            image = "https://encrypted-tbn1.gstatic.com/shopping?q=tbn:ANd9GcR1y5mgINhTGxjG8ckeeGN2fvmca4bRyPYPJDnHiOTW6aeC-8aeB_e2_6RCd3G-0SZVbvJK0LWJ0PzSwHmmrZ2dPicGBJ_9j0HFGhNM6QoanYnUK5Ez-gs8iSQm3yaQqmbwwaFsTg&usqp=CAc",
+            category = "Áo thun",
+            description = "Mô tả sản phẩm 2",
+            createdAt = "2024-11-20",
+            updatedAt = "2024-11-21"
+        )
+    )
     val isRefreshing = remember { mutableStateOf(false) }
     val coroutineScope = rememberCoroutineScope()
 
@@ -332,17 +366,24 @@ fun ProductListScreen(navController: NavHostController, productViewModel: Produc
         ) {
             items(products) { product ->
                 // Mã hóa URL
-                val encodedImageUrl = URLEncoder.encode(product.image_url, StandardCharsets.UTF_8.toString())
+                val encodedImageUrl = URLEncoder.encode(product.image, StandardCharsets.UTF_8.toString())
+                val encodedSize = URLEncoder.encode(product.size.joinToString(","), StandardCharsets.UTF_8.toString())
+                val encodedColor = URLEncoder.encode(product.color.joinToString(","), StandardCharsets.UTF_8.toString())
                 ProductItem(
-                    imageUrl = product.image_url,
-                    rating = product.ratings,
-                    title = product.name,
+                    title = product.title,
+                    code = product.code,
+                    quantity = product.quantity,
                     price = product.price,
-                    description = product.description,
+                    size = product.size,
+                    color = product.color,
+                    image = product.image,
                     category = product.category,
+                    description = product.description,
+                    createdAt = product.createdAt,
+                    updatedAt = product.updatedAt,
                     onclick = {
                         navController.navigate(
-                            "productDetail/${product.name}/${encodedImageUrl}/${product.price}/${product.description}/${product.category}/${product.ratings}"
+                            "productDetail/${product.title}/${product.code}/${product.quantity}/${product.price}/$encodedSize/$encodedColor/$encodedImageUrl/${product.category}/${product.description}/${product.createdAt}/${product.updatedAt}"
                         )
                     }
                 )
@@ -425,33 +466,17 @@ fun BottomAppBarContent(navController: NavHostController, currentScreen: String)
             modifier = Modifier
                 .height(if (currentScreen == "home") 120.dp else 100.dp) // Phóng to khi được chọn
         )
-
-//        // Nút để chuyển sang màn hình thêm sản phẩm
-//        BottomNavigationItem(
-//            icon = { Icon(Icons.Filled.Add, contentDescription = "") },
-//            label = { Text("Thêm SP", textAlign = TextAlign.Center) },
-//            selected = currentScreen == "addProduct", // Kiểm tra nếu màn hình hiện tại là "addProduct"
-//            onClick = {
-//                navController.navigate("addProduct") // Chuyển sang màn hình thêm sản phẩm
-//            },
-//            selectedContentColor = selected_btn_choose,
-//            unselectedContentColor = selected_btn_not_choose,
-//            modifier = Modifier
-//                .height(if (currentScreen == "addProduct") 120.dp else 100.dp)
-//        )
-
-
         BottomNavigationItem(
-            icon = { Icon(Icons.Filled.Favorite, contentDescription = "Yêu Thích") },
-            label = { Text("Yêu Thích", textAlign = TextAlign.Center) },
-            selected = currentScreen == "favourite", // Kiểm tra nếu màn hình hiện tại là "favorites"
+            icon = { Icon(Icons.Filled.Bill, contentDescription = "Hóa dơn") },
+            label = { Text("Hóa đơn", textAlign = TextAlign.Center) },
+            selected = currentScreen == "history", // Kiểm tra nếu màn hình hiện tại là "favorites"
             onClick = {
-                navController.navigate("favourite")
+                navController.navigate("history")
             },
             selectedContentColor = selected_btn_choose,
             unselectedContentColor = selected_btn_not_choose,
             modifier = Modifier
-                .height(if (currentScreen == "favourite") 120.dp else 100.dp)
+                .height(if (currentScreen == "history") 120.dp else 100.dp)
         )
 
         BottomNavigationItem(
